@@ -1,0 +1,14 @@
+// Mount Storage
+// Copyright (c) 2023 Grigore Stefan <g_stefan@yahoo.com>
+// MIT License (MIT) <http://opensource.org/licenses/MIT>
+// SPDX-FileCopyrightText: 2023 Grigore Stefan <g_stefan@yahoo.com>
+// SPDX-License-Identifier: MIT
+
+#include <XYO/MountStorage/Application.rh>
+#include <XYO/MountStorage/Copyright.rh>
+#include <XYO/MountStorage/Version.rh>
+
+1  ICON "Application.ico"
+
+XYO_APPLICATION_VERSION_INFO(XYO_MOUNTSTORAGE,"mount-storage.exe","Mount Storage")
+XYO_APPLICATION_MANIFEST("Application.manifest")

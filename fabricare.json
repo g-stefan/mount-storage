@@ -1,0 +1,24 @@
+{
+	"solution": {
+		"name" : "mount-storage",
+		"type" : "xyo-cpp",
+		"projects": [
+			{
+				"name" : "mount-storage",
+				"make" : "exe.static",
+				"SPDX-License-Identifier": "MIT",
+				"sourcePath" : "XYO/MountStorage",
+				"dependency" : [
+					"xyo-win-service"
+				],
+				"library" : [
+					"virtdisk",
+					"uuid",
+					"advapi32"
+				]
+			}
+		],
+		"releaseDev" : false,
+		"hasGithub" : true		
+	}
+}
