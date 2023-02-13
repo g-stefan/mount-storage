@@ -17,6 +17,7 @@ namespace XYO::MountStorage {
 			XYO_DISALLOW_COPY_ASSIGN_MOVE(Application);
 
 		public:
+			static bool isTask;
 			Application();
 
 			void showUsage();
@@ -29,6 +30,7 @@ namespace XYO::MountStorage {
 			String getDateTime();
 			bool isElevated();
 			int mountVHDX(const char *filename);
+			bool getMountedVHDX(TDynamicArray<String> &fileList);
 	};
 
 };

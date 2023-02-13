@@ -16,8 +16,22 @@
 
 namespace XYO::MountStorage {
 
+	struct VHDXProblem {
+			enum {
+				None = 0,
+				ErrorOpen,
+				ErrorRead,
+				ErrorMount,
+				AlreadyMounted,
+				Ok
+			};
+	};
+
+	bool Application::isTask;
+
 	Application::Application() {
 		serviceName = "Mount Storage";
+		isTask = false;
 	};
 
 	void Application::showUsage() {
@@ -35,6 +49,7 @@ namespace XYO::MountStorage {
 		       "    --stop              stop service\n"
 		       "    --start             start service\n"
 		       "    --run               run as current user\n"
+		       "    --task              run from task\n"
 		       "    --service           internal, run as service\n");
 		printf("\n");
 	};
@@ -77,8 +92,13 @@ namespace XYO::MountStorage {
 						return 0;
 					};
 				};
+				if (strcmp(opt, "task") == 0) {
+					isTask = true;
+					cmdRun();
+					return 0;
+				};
 				if (strcmp(opt, "install") == 0) {
-					install();
+					cmdInstall();
 					String cmd;
 
 					// Make User Profile Loader Service dependable on our service
@@ -88,16 +108,39 @@ namespace XYO::MountStorage {
 					cmd << "\"";
 
 					XYO::System::Shell::executeHidden(cmd);
-					return 0;
+
+					// Create Task to run on boot from Windows 11 fast boot (Shutdown)
+					TDynamicArray<TDynamicArray<String>> replace;
+					String appPath = XYO::System::Shell::getExecutablePath();
+					replace[0][0] = "${APPLICATION_PATH}";
+					replace[0][1] = appPath;
+					String fileIn = appPath;
+					fileIn += "\\mount-storage.task.template.xml";
+					String fileOut = appPath;
+					fileOut += "\\mount-storage.task.xml";
+					if (XYO::System::Shell::fileReplaceTextUTF8(fileIn, fileOut, replace, 16238, UTFStreamMode::UTF16)) {
+						String cmd;
+						cmd = "schtasks.exe /Create /XML \"";
+						cmd += fileOut;
+						cmd += "\" /TN \"Mount Storage\"";
+
+						XYO::System::Shell::executeHidden(cmd);
+						return 0;
+					};
+					return 1;
 				};
 				if (strcmp(opt, "uninstall") == 0) {
 					String cmd;
+
+					// Remov Task
+					cmd = "schtasks.exe /Delete /TN \"Mount Storage\" /F";
+					XYO::System::Shell::executeHidden(cmd);
 
 					// Restore User Profile Loader Service dependency
 					cmd = "sc config ProfSvc depend= RpcSs";
 					XYO::System::Shell::executeHidden(cmd);
 
-					uninstall();
+					cmdUninstall();
 					return 0;
 				};
 				continue;
@@ -169,16 +212,48 @@ namespace XYO::MountStorage {
 		                       (PCWSTR)wfilename, VIRTUAL_DISK_ACCESS_ATTACH_RW, OPEN_VIRTUAL_DISK_FLAG_NONE, nullptr, &vhdxHandle);
 
 		if (retV != ERROR_SUCCESS) {
-			return 1;
+			return VHDXProblem::ErrorOpen;
 		};
 		retV = AttachVirtualDisk(vhdxHandle, nullptr, ATTACH_VIRTUAL_DISK_FLAG_PERMANENT_LIFETIME, 0, nullptr, nullptr);
 		if (retV != ERROR_SUCCESS) {
 			CloseHandle(vhdxHandle);
-			return 2;
+			return VHDXProblem::ErrorMount;
 		};
 
 		CloseHandle(vhdxHandle);
-		return 3;
+		return VHDXProblem::Ok;
+	};
+
+	bool Application::getMountedVHDX(TDynamicArray<String> &fileList) {
+		DWORD status;
+		ULONG bufferSize;
+		LPWSTR buffer;
+		ULONG bufferIndex;
+
+		// prealocate for at least 16 entries
+		bufferSize = (MAX_PATH + 1) * 16 * sizeof(uint16_t);
+		buffer = reinterpret_cast<LPWSTR>(new uint8_t[bufferSize]());
+		status = GetAllAttachedVirtualDiskPhysicalPaths(&bufferSize, buffer);
+		if (status == ERROR_INSUFFICIENT_BUFFER) {
+			delete[] reinterpret_cast<uint8_t *>(buffer);
+			buffer = reinterpret_cast<LPWSTR>(new uint8_t[bufferSize]());
+			status = GetAllAttachedVirtualDiskPhysicalPaths(&bufferSize, buffer);
+			if (status != ERROR_SUCCESS) {
+				delete[] reinterpret_cast<uint8_t *>(buffer);
+				return false;
+			};
+		};
+
+		fileList.empty();
+		for (bufferIndex = 0; bufferIndex < (bufferSize / sizeof(utf16)); ++bufferIndex) {
+			if (buffer[bufferIndex] == 0) {
+				break;
+			};
+			fileList.push(UTF::utf8FromUTF16(reinterpret_cast<utf16 *>(&buffer[bufferIndex])));
+			bufferIndex += StringUTF16Core::length(reinterpret_cast<utf16 *>(&buffer[bufferIndex]));
+		};
+
+		return true;
 	};
 
 	void Application::serviceWork() {
@@ -188,6 +263,7 @@ namespace XYO::MountStorage {
 		String logFilename = String::replace(executablePath, ".exe", ".log");
 
 		TDynamicArray<String> vhdList;
+		TDynamicArray<String> vhdMountedList;
 		TDynamicArray<int> vhdProblem;
 
 		File cfgFile;
@@ -233,43 +309,72 @@ namespace XYO::MountStorage {
 
 		cfgFile.close();
 
-		// Check vhd/vhdx for reading
+		//
 
 		int index;
 		char buffer[64 * 1024];
 		File vhdFile;
 		int tryCount;
+		int tryCountLn;
 		bool isOk;
 
 		for (index = 0; index < vhdList.length(); ++index) {
-			vhdProblem[index] = 0;
+			vhdProblem[index] = VHDXProblem::None;
 		};
 
-		for (tryCount = 0; tryCount < 3; ++tryCount) {
+		// Check if already mounted
+		if (getMountedVHDX(vhdMountedList)) {
+			int scan;
+			for (scan = 0; scan < vhdMountedList.length(); ++scan) {
+				for (index = 0; index < vhdList.length(); ++index) {
+					if (vhdList[index] == vhdMountedList[scan]) {
+						vhdProblem[index] = VHDXProblem::AlreadyMounted;
+						break;
+					};
+				};
+			};
+		};
+
+		// Check vhd/vhdx for reading
+
+		tryCountLn = 3;
+		if (isTask) {
+			tryCountLn = 1;
+		};
+
+		isOk = false;
+
+		for (tryCount = 0; tryCount < tryCountLn; ++tryCount) {
 
 			for (index = 0; index < vhdList.length(); ++index) {
-				if (vhdProblem[index] == 3) {
+				if (vhdProblem[index] == VHDXProblem::AlreadyMounted) {
+					continue;
+				};
+				if (vhdProblem[index] == VHDXProblem::Ok) {
 					continue;
 				};
 
 				if (!vhdFile.openRead(vhdList[index])) {
-					vhdProblem[index] = 1;
+					vhdProblem[index] = VHDXProblem::ErrorOpen;
 					continue;
 				};
 
 				if (!(vhdFile.read(buffer, 64 * 1024) == 64 * 1024)) {
-					vhdProblem[index] = 2;
+					vhdProblem[index] = VHDXProblem::ErrorRead;
 					continue;
 				};
 
 				vhdFile.close();
 
-				vhdProblem[index] = 3;
+				vhdProblem[index] = VHDXProblem::Ok;
 			};
 
 			isOk = true;
 			for (index = 0; index < vhdList.length(); ++index) {
-				if (vhdProblem[index] != 3) {
+				if (vhdProblem[index] != VHDXProblem::Ok) {
+					if (vhdProblem[index] == VHDXProblem::AlreadyMounted) {
+						continue;
+					};
 					isOk = false;
 					break;
 				};
@@ -283,12 +388,12 @@ namespace XYO::MountStorage {
 			break;
 		};
 
-		if (!isOk) {
+		if ((!isOk) && (!isTask)) {
 			datetime = getDateTime();
 
 			for (index = 0; index < vhdList.length(); ++index) {
 
-				if (vhdProblem[index] == 1) {
+				if (vhdProblem[index] == VHDXProblem::ErrorOpen) {
 					info = datetime;
 					info += " Error: unable to open \"";
 					info += vhdList[index];
@@ -296,7 +401,7 @@ namespace XYO::MountStorage {
 					StreamX::writeLn(logFile, info);
 				};
 
-				if (vhdProblem[index] == 2) {
+				if (vhdProblem[index] == VHDXProblem::ErrorRead) {
 					info = datetime;
 					info += " Error: unable to read \"";
 					info += vhdList[index];
@@ -313,12 +418,17 @@ namespace XYO::MountStorage {
 		// Mount vhd/vhdx
 
 		for (index = 0; index < vhdList.length(); ++index) {
-			vhdProblem[index] = mountVHDX(vhdList[index]);
+			if (vhdProblem[index] == VHDXProblem::Ok) {
+				vhdProblem[index] = mountVHDX(vhdList[index]);
+			};
 		};
 
 		isOk = true;
 		for (index = 0; index < vhdList.length(); ++index) {
-			if (vhdProblem[index] != 3) {
+			if (vhdProblem[index] != VHDXProblem::Ok) {
+				if (vhdProblem[index] == VHDXProblem::AlreadyMounted) {
+					continue;
+				};
 				isOk = false;
 				break;
 			};
@@ -327,9 +437,20 @@ namespace XYO::MountStorage {
 		datetime = getDateTime();
 
 		if (isOk) {
+			bool alreadyMounted = true;
+			for (index = 0; index < vhdList.length(); ++index) {
+				if (vhdProblem[index] != VHDXProblem::AlreadyMounted) {
+					alreadyMounted = false;
+					break;
+				};
+			};
+			if (alreadyMounted) {
+				logFile.close();
+				return;
+			};
 
 			info = datetime;
-			info += " Mounted successfully";			
+			info += " Mounted successfully";
 			StreamX::writeLn(logFile, info);
 
 			logFile.flush();
@@ -338,20 +459,20 @@ namespace XYO::MountStorage {
 			//
 			// Wait 30 seconds, possible multiple runs if is ending too fast, before User Profile Service
 			//
-			int count=0;
+			int count = 0;
 			while (!serviceStopEvent.peek()) {
 				++count;
-				if(count>=30) {
+				if (count >= 30) {
 					break;
 				};
 				Thread::sleep(1000);
 			};
 			return;
-		};		
+		};
 
 		for (index = 0; index < vhdList.length(); ++index) {
 
-			if (vhdProblem[index] == 1) {
+			if (vhdProblem[index] == VHDXProblem::ErrorOpen) {
 				info = datetime;
 				info += " Error: unable to open \"";
 				info += vhdList[index];
@@ -359,7 +480,7 @@ namespace XYO::MountStorage {
 				StreamX::writeLn(logFile, info);
 			};
 
-			if (vhdProblem[index] == 2) {
+			if (vhdProblem[index] == VHDXProblem::ErrorMount) {
 				info = datetime;
 				info += " Error: unable to mount \"";
 				info += vhdList[index];
