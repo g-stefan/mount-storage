@@ -37,7 +37,7 @@ namespace XYO::MountStorage {
 	void Application::showUsage() {
 		printf("Mount-Storage - Automatically mount VHD/VHDX on windows start-up\n");
 		showVersion();
-		printf("%s\n\n", MountStorage::Copyright::copyright());
+		printf("%s\n\n", MountStorage::Copyright::copyright().c_str());
 
 		printf("%s",
 		       "options:\n"
@@ -55,7 +55,7 @@ namespace XYO::MountStorage {
 	};
 
 	void Application::showLicense() {
-		printf("%s", MountStorage::License::license());
+		printf("%s", MountStorage::License::license().c_str());
 	};
 
 	void Application::showVersion() {
