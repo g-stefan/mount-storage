@@ -37,7 +37,7 @@ namespace XYO::MountStorage {
 	void Application::showUsage() {
 		printf("Mount-Storage - Automatically mount VHD/VHDX on windows start-up\n");
 		showVersion();
-		printf("%s\n\n", MountStorage::Copyright::copyright().c_str());
+		printf("%s\n\n", MountStorage::Copyright::copyright());
 
 		printf("%s",
 		       "options:\n"
@@ -259,8 +259,8 @@ namespace XYO::MountStorage {
 	void Application::serviceWork() {
 		char executablePath[MAX_PATH];
 		GetModuleFileName(NULL, executablePath, MAX_PATH);
-		String cfgFilename = String::replace(executablePath, ".exe", ".cfg");
-		String logFilename = String::replace(executablePath, ".exe", ".log");
+		String cfgFilename = StringX::replace(executablePath, ".exe", ".cfg");
+		String logFilename = StringX::replace(executablePath, ".exe", ".log");
 
 		TDynamicArray<String> vhdList;
 		TDynamicArray<String> vhdMountedList;
@@ -297,7 +297,7 @@ namespace XYO::MountStorage {
 
 		String line;
 		while (StreamX::readLn(cfgFile, line, 4096)) {
-			line = String::trimAscii(line);
+			line = StringX::trimAscii(line);
 			if (line.length() == 0) {
 				continue;
 			};
