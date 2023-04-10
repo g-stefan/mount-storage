@@ -259,8 +259,8 @@ namespace XYO::MountStorage {
 	void Application::serviceWork() {
 		char executablePath[MAX_PATH];
 		GetModuleFileName(NULL, executablePath, MAX_PATH);
-		String cfgFilename = StringX::replace(executablePath, ".exe", ".cfg");
-		String logFilename = StringX::replace(executablePath, ".exe", ".log");
+		String cfgFilename = executablePath.replace( ".exe", ".cfg");
+		String logFilename = executablePath.replace(".exe", ".log");
 
 		TDynamicArray<String> vhdList;
 		TDynamicArray<String> vhdMountedList;
@@ -297,7 +297,7 @@ namespace XYO::MountStorage {
 
 		String line;
 		while (StreamX::readLn(cfgFile, line, 4096)) {
-			line = StringX::trimAscii(line);
+			line = line.trimAscii();
 			if (line.length() == 0) {
 				continue;
 			};
