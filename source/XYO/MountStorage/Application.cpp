@@ -259,7 +259,7 @@ namespace XYO::MountStorage {
 	void Application::serviceWork() {
 		char executablePath[MAX_PATH];
 		GetModuleFileName(NULL, executablePath, MAX_PATH);
-		String cfgFilename = executablePath.replace( ".exe", ".cfg");
+		String cfgFilename = executablePath.replace(".exe", ".cfg");
 		String logFilename = executablePath.replace(".exe", ".log");
 
 		TDynamicArray<String> vhdList;
