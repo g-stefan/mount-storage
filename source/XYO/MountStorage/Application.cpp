@@ -280,7 +280,7 @@ namespace XYO::MountStorage {
 		if (!isElevated()) {
 			info = getDateTime();
 			info += " Error: process require elevation";
-			StreamX::writeLn(logFile, info);
+			Stream::writeLn(logFile, info);
 			logFile.flush();
 			logFile.close();
 			return;
@@ -289,14 +289,14 @@ namespace XYO::MountStorage {
 		if (!cfgFile.openRead(cfgFilename)) {
 			info = getDateTime();
 			info += " Error: config file not found";
-			StreamX::writeLn(logFile, info);
+			Stream::writeLn(logFile, info);
 			logFile.flush();
 			logFile.close();
 			return;
 		};
 
 		String line;
-		while (StreamX::readLn(cfgFile, line, 4096)) {
+		while (Stream::readLn(cfgFile, line, 4096)) {
 			line = line.trimAscii();
 			if (line.length() == 0) {
 				continue;
@@ -398,7 +398,7 @@ namespace XYO::MountStorage {
 					info += " Error: unable to open \"";
 					info += vhdList[index];
 					info += "\"";
-					StreamX::writeLn(logFile, info);
+					Stream::writeLn(logFile, info);
 				};
 
 				if (vhdProblem[index] == VHDXProblem::ErrorRead) {
@@ -406,7 +406,7 @@ namespace XYO::MountStorage {
 					info += " Error: unable to read \"";
 					info += vhdList[index];
 					info += "\"";
-					StreamX::writeLn(logFile, info);
+					Stream::writeLn(logFile, info);
 				};
 			};
 
@@ -451,7 +451,7 @@ namespace XYO::MountStorage {
 
 			info = datetime;
 			info += " Mounted successfully";
-			StreamX::writeLn(logFile, info);
+			Stream::writeLn(logFile, info);
 
 			logFile.flush();
 			logFile.close();
@@ -477,7 +477,7 @@ namespace XYO::MountStorage {
 				info += " Error: unable to open \"";
 				info += vhdList[index];
 				info += "\"";
-				StreamX::writeLn(logFile, info);
+				Stream::writeLn(logFile, info);
 			};
 
 			if (vhdProblem[index] == VHDXProblem::ErrorMount) {
@@ -485,7 +485,7 @@ namespace XYO::MountStorage {
 				info += " Error: unable to mount \"";
 				info += vhdList[index];
 				info += "\"";
-				StreamX::writeLn(logFile, info);
+				Stream::writeLn(logFile, info);
 			};
 		};
 
