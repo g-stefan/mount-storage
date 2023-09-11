@@ -41,6 +41,7 @@ namespace XYO::MountStorage {
 
 		printf("%s",
 		       "options:\n"
+		       "    --help              this info\n"
 		       "    --usage             this info\n"
 		       "    --license           show license\n"
 		       "    --version           show version\n"
@@ -74,6 +75,12 @@ namespace XYO::MountStorage {
 		for (i = 1; i < cmdN; ++i) {
 			if (strncmp(cmdS[i], "--", 2) == 0) {
 				opt = &cmdS[i][2];
+				if (strcmp(opt, "help") == 0) {
+					showLicense();
+					if (cmdN == 2) {
+						return 0;
+					};
+				};
 				if (strcmp(opt, "usage") == 0) {
 					showLicense();
 					if (cmdN == 2) {
