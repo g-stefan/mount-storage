@@ -1,13 +1,13 @@
 // Mount Storage
-// Copyright (c) 2023 Grigore Stefan <g_stefan@yahoo.com>
+// Copyright (c) 2023-2024 Grigore Stefan <g_stefan@yahoo.com>
 // MIT License (MIT) <http://opensource.org/licenses/MIT>
-// SPDX-FileCopyrightText: 2023 Grigore Stefan <g_stefan@yahoo.com>
+// SPDX-FileCopyrightText: 2023-2024 Grigore Stefan <g_stefan@yahoo.com>
 // SPDX-License-Identifier: MIT
 
 #ifndef XYO_MOUNTSTORAGE_COPYRIGHT_RH
 #define XYO_MOUNTSTORAGE_COPYRIGHT_RH
 
-#define XYO_MOUNTSTORAGE_COPYRIGHT "Copyright (c) 2023 Grigore Stefan <g_stefan@yahoo.com>"
+#define XYO_MOUNTSTORAGE_COPYRIGHT "Copyright (c) 2023-2024 Grigore Stefan <g_stefan@yahoo.com>"
 #define XYO_MOUNTSTORAGE_PUBLISHER "Grigore Stefan"
 #define XYO_MOUNTSTORAGE_COMPANY XYO_MOUNTSTORAGE_PUBLISHER
 #define XYO_MOUNTSTORAGE_CONTACT "g_stefan@yahoo.com"
