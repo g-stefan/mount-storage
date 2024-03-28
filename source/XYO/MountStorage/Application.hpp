@@ -14,7 +14,7 @@
 namespace XYO::MountStorage {
 
 	class Application : public virtual Service {
-			XYO_DISALLOW_COPY_ASSIGN_MOVE(Application);
+			XYO_PLATFORM_DISALLOW_COPY_ASSIGN_MOVE(Application);
 
 		public:
 			static bool isTask;
