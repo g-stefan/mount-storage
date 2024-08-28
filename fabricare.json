@@ -5,7 +5,7 @@
 		"projects": [
 			{
 				"name" : "mount-storage",
-				"make" : "exe.static",
+				"make" : "exe",
 				"SPDX-License-Identifier": "MIT",
 				"sourcePath" : "XYO/MountStorage",
 				"dependency" : [
