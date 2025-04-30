@@ -73,5 +73,5 @@ The program will create a file, mount-storage.log, with date and time with opera
 
 ## License
 
-Copyright (c) 2023-2024 Grigore Stefan
+Copyright (c) 2023-2025 Grigore Stefan
 Licensed under the [MIT](LICENSE) license.

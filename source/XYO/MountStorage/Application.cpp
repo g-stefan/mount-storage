@@ -1,7 +1,7 @@
 // Mount Storage
-// Copyright (c) 2023-2024 Grigore Stefan <g_stefan@yahoo.com>
+// Copyright (c) 2023-2025 Grigore Stefan <g_stefan@yahoo.com>
 // MIT License (MIT) <http://opensource.org/licenses/MIT>
-// SPDX-FileCopyrightText: 2023-2024 Grigore Stefan <g_stefan@yahoo.com>
+// SPDX-FileCopyrightText: 2023-2025 Grigore Stefan <g_stefan@yahoo.com>
 // SPDX-License-Identifier: MIT
 
 #include <XYO/MountStorage/Dependency.hpp>
@@ -304,7 +304,7 @@ namespace XYO::MountStorage {
 
 		String line;
 		while (Stream::readLn(cfgFile, line, 4096)) {
-			line = line.trimAscii();
+			line = line.trimASCII();
 			if (line.length() == 0) {
 				continue;
 			};
