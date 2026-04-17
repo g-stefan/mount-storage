@@ -1,7 +1,7 @@
 // Mount Storage
-// Copyright (c) 2023-2025 Grigore Stefan <g_stefan@yahoo.com>
+// Copyright (c) 2023-2026 Grigore Stefan <g_stefan@yahoo.com>
 // MIT License (MIT) <http://opensource.org/licenses/MIT>
-// SPDX-FileCopyrightText: 2023-2025 Grigore Stefan <g_stefan@yahoo.com>
+// SPDX-FileCopyrightText: 2023-2026 Grigore Stefan <g_stefan@yahoo.com>
 // SPDX-License-Identifier: MIT
 
 #include <XYO/MountStorage/Dependency.hpp>
@@ -119,7 +119,7 @@ namespace XYO::MountStorage {
 					// Create Task to run on boot from Windows 11 fast boot (Shutdown)
 					TDynamicArray<TDynamicArray<String>> replace;
 					String appPath = XYO::System::Shell::getExecutablePath();
-					replace[0][0] = "${APPLICATION_PATH}";
+					replace[0][0] = "#{APPLICATION_PATH}";
 					replace[0][1] = appPath;
 					String fileIn = appPath;
 					fileIn += "\\mount-storage.task.template.xml";
