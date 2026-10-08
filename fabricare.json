@@ -1,8 +1,27 @@
 {
 	"solution": {
+		"namespace" : "xyo",
 		"name" : "mount-storage",
 		"type" : "xyo-cpp",
 		"projects": [
+			{
+				"name" : "mount-storage.application",
+				"make" : "lib",
+				"SPDX-License-Identifier": "MIT",
+				"sourcePath" : "XYO/MountStorage",
+				"dependency" : [
+					"xyo-win-service"
+				],
+				"library" : [
+					"virtdisk",
+					"uuid",
+					"advapi32"
+				],
+				"defines" : [
+					"XYO_MOUNTSTORAGE_LIBRARY"
+				],
+				"linkVersion" : "mount-storage"
+			},
 			{
 				"name" : "mount-storage",
 				"make" : "exe",
@@ -15,6 +34,24 @@
 					"virtdisk",
 					"uuid",
 					"advapi32"
+				]
+			},
+			{
+				"name" : "test.01",
+				"make" : "exe",
+				"category" : "test",
+				"SPDX-License-Identifier": "Unlicense",
+				"dependency" : [
+					"mount-storage.application"
+				]
+			},
+			{
+				"name" : "test.02",
+				"make" : "exe",
+				"category" : "test",
+				"SPDX-License-Identifier": "Unlicense",
+				"dependency" : [
+					"mount-storage.application"
 				]
 			}
 		],

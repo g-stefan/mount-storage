@@ -36,9 +36,9 @@ Get-PhysicalDisk | sort-object SlotNumber | select SlotNumber, FriendlyName, Man
 
 Go to Storage Spaces and create a new storage with those new virtual disks.
 
-Copy ***mount-storage*** to C:\Storage
+Copy ***mount-storage.exe*** and ***mount-storage.task.template.xml*** to C:\Storage
 
-Create mount-storage.cfg file, it will not work otherwise.
+Create C:\Storage\mount-storage.cfg file, it will not work otherwise. One full path per line, UTF-8.
 
 ```
 #
@@ -70,6 +70,14 @@ The program will create a file, mount-storage.log, with date and time with opera
 ```
 [ 2023-01-27 00:18:35 ] Mounted successfully
 ```
+
+To remove, run `mount-storage.exe --uninstall` from an administrative console.
+Do not delete the service or the program without it: the User Profile Service depends on it.
+
+# Documentation
+
+See [docs](docs/README.md): getting started, command line, configuration and log,
+how it works, troubleshooting, library and tests.
 
 ## License
 

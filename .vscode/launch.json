@@ -8,10 +8,10 @@
 			"name": "(Windows) Launch",
 			"type": "cppvsdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/bin/mount-storage.exe",
+			"program": "${workspaceFolder}/output/bin/mount-storage.exe",
 			"args": [],
 			"stopAtEntry": false,
-			"cwd": "${workspaceFolder}/bin",
+			"cwd": "${workspaceFolder}/output/bin",
 			"environment": [],
 			"externalConsole": true
 		}
