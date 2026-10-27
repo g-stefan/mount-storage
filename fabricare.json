@@ -1,6 +1,5 @@
 {
 	"solution": {
-		"namespace" : "xyo",
 		"name" : "mount-storage",
 		"type" : "xyo-cpp",
 		"projects": [
